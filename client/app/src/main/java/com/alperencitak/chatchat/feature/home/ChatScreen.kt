@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(hostIp: String) {
     var username by remember { mutableStateOf("") }
@@ -15,9 +16,15 @@ fun ChatScreen(hostIp: String) {
     val messages by chatViewModel.messages.collectAsState()
     var input by remember { mutableStateOf("") }
 
+    val algorithms = listOf("Caesar", "RSA", "Vigenère")
+    var expanded by remember { mutableStateOf(false) }
+    var selectedAlgorithm by remember { mutableStateOf("Caesar") }
+
     if (!joined) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
             TextField(
@@ -26,13 +33,53 @@ fun ChatScreen(hostIp: String) {
                 label = { Text("Kullanıcı adı") },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {
-                if (username.isNotBlank()) {
-                    chatViewModel.connectWebSocket(hostIp, username)
-                    joined = true
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    value = selectedAlgorithm,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Şifreleme Algoritması") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    algorithms.forEach { algo ->
+                        DropdownMenuItem(
+                            text = { Text(algo) },
+                            onClick = {
+                                selectedAlgorithm = algo
+                                expanded = false
+                            }
+                        )
+                    }
                 }
-            }, modifier = Modifier.fillMaxWidth()) {
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (username.isNotBlank()) {
+                        chatViewModel.connectWebSocket(hostIp, username)
+                        joined = true
+                    }
+                },
+                enabled = username.isNotBlank(),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Katıl")
             }
         }
@@ -66,4 +113,3 @@ fun ChatScreen(hostIp: String) {
         }
     }
 }
-
