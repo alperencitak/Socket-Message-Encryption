@@ -1,9 +1,9 @@
 package com.alperencitak.chatchat.feature.home
 
 import androidx.lifecycle.ViewModel
-import com.alperencitak.chatchat.algorithms.caesar.Algorithm
-import com.alperencitak.chatchat.algorithms.caesar.Caesar
-import com.alperencitak.chatchat.algorithms.caesar.HillCipher
+import com.alperencitak.chatchat.algorithms.Algorithm
+import com.alperencitak.chatchat.algorithms.Caesar
+import com.alperencitak.chatchat.algorithms.HillCipher
 import com.alperencitak.chatchat.feature.model.ChatMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
