@@ -44,7 +44,7 @@ fun LoginView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "ChatChat",
+            text = "SocketChat",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -52,7 +52,7 @@ fun LoginView(
         )
 
         Text(
-            text = "Sohbete katılmak için bilgilerinizi girin",
+            text = "Enter your information to join the chat",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             textAlign = TextAlign.Center,
@@ -64,8 +64,8 @@ fun LoginView(
         CustomTextField(
             value = username,
             onValueChange = onChangeUsername,
-            label = "Kullanıcı adı",
-            placeholder = "Kullanıcı adınızı girin",
+            label = "Username",
+            placeholder = "Enter username",
             leadingIcon = Icons.Default.Person,
             modifier = Modifier.fillMaxWidth()
         )
@@ -86,8 +86,8 @@ fun LoginView(
                     value = selectedAlgorithm,
                     onValueChange = {},
                     readOnly = true,
-                    label = "Şifreleme Algoritması",
-                    placeholder = "Algoritma seçin",
+                    label = "Encryption Algorithm",
+                    placeholder = "Select Algorithm",
                     leadingIcon = Icons.Default.Lock,
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -138,7 +138,7 @@ fun LoginView(
             )
         ) {
             Text(
-                text = "Sohbete Katıl",
+                text = "Join Chat",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp
