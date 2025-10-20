@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.alperencitak.chatchat.feature.home.ChatScreen
+import com.alperencitak.chatchat.feature.home.MainScreen
 
 @Composable
 fun MainApp() {
@@ -31,7 +31,7 @@ fun MainApp() {
             )
         ) {
             composable(route = "chat") {
-                ChatScreen(hostIp = "10.0.2.2")
+                MainScreen(hostIp = "10.0.2.2")
             }
         }
     }
