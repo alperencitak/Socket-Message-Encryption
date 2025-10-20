@@ -1,6 +1,8 @@
 package com.alperencitak.chatchat.feature.home
 
 import androidx.lifecycle.ViewModel
+import com.alperencitak.chatchat.algorithms.caesar.Algorithm
+import com.alperencitak.chatchat.algorithms.caesar.Caesar
 import com.alperencitak.chatchat.feature.model.ChatMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,9 +19,16 @@ class ChatViewModel @Inject constructor(
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages
 
+    private val _algorithm = MutableStateFlow<Algorithm?>(null)
+    val algorithm: StateFlow<Algorithm?> = _algorithm
+
     private val shift = 3
     private lateinit var webSocket: WebSocket
     private lateinit var username: String
+
+    init {
+        _algorithm.value = Caesar()
+    }
 
     fun connectWebSocket(hostIp: String, username: String) {
         this.username = username
@@ -30,11 +39,13 @@ class ChatViewModel @Inject constructor(
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    val json = JSONObject(text)
-                    val sender = json.getString("sender")
-                    val encrypted = json.getString("message")
-                    val decrypted = caesarDecrypt(encrypted)
-                    _messages.value += ChatMessage(decrypted, sender)
+                    if(_algorithm.value != null){
+                        val json = JSONObject(text)
+                        val sender = json.getString("sender")
+                        val encrypted = json.getString("message")
+                        val decrypted = _algorithm.value!!.decrypt(encrypted, shift)
+                        _messages.value += ChatMessage(decrypted, sender)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -46,30 +57,27 @@ class ChatViewModel @Inject constructor(
         })
     }
 
-    fun sendMessage(text: String) {
-        val encrypted = caesarEncrypt(text)
-        val json = JSONObject()
-        json.put("sender", username)
-        json.put("message", encrypted)
-
-        webSocket.send(json.toString())
-        _messages.value += ChatMessage(text, username)
+    fun changeAlgorithm(selectedAlgorithm: String){
+        _algorithm.value = when(selectedAlgorithm){
+            "caesar" -> {
+                Caesar()
+            }
+            else -> {
+                Caesar()
+            }
+        }
     }
 
-    private fun caesarEncrypt(text: String) = text.map {
-        when {
-            it.isUpperCase() -> 'A' + (it - 'A' + shift) % 26
-            it.isLowerCase() -> 'a' + (it - 'a' + shift) % 26
-            else -> it
-        }
-    }.joinToString("")
+    fun sendMessage(text: String) {
+        if(_algorithm.value != null){
+            val encrypted = _algorithm.value!!.encrypt(text, shift)
+            val json = JSONObject()
+            json.put("sender", username)
+            json.put("message", encrypted)
 
-    private fun caesarDecrypt(text: String) = text.map {
-        when {
-            it.isUpperCase() -> 'A' + (it - 'A' + (26 - shift)) % 26
-            it.isLowerCase() -> 'a' + (it - 'a' + (26 - shift)) % 26
-            else -> it
+            webSocket.send(json.toString())
+            _messages.value += ChatMessage(text, username)
         }
-    }.joinToString("")
+    }
 }
 
