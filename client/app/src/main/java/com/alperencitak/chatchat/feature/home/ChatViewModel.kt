@@ -3,6 +3,7 @@ package com.alperencitak.chatchat.feature.home
 import androidx.lifecycle.ViewModel
 import com.alperencitak.chatchat.algorithms.caesar.Algorithm
 import com.alperencitak.chatchat.algorithms.caesar.Caesar
+import com.alperencitak.chatchat.algorithms.caesar.HillCipher
 import com.alperencitak.chatchat.feature.model.ChatMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,8 +60,12 @@ class ChatViewModel @Inject constructor(
 
     fun changeAlgorithm(selectedAlgorithm: String){
         _algorithm.value = when(selectedAlgorithm){
-            "caesar" -> {
+            "Caesar" -> {
                 Caesar()
+            }
+            "HillCipher" -> {
+                val key = arrayOf(intArrayOf(3, 3), intArrayOf(2, 5))
+                HillCipher(key = key)
             }
             else -> {
                 Caesar()

@@ -16,7 +16,7 @@ fun ChatScreen(hostIp: String) {
     val messages by chatViewModel.messages.collectAsState()
     var input by remember { mutableStateOf("") }
 
-    val algorithms = listOf("Caesar", "RSA", "Vigenère")
+    val algorithms = listOf("Caesar", "HillCipher")
     var expanded by remember { mutableStateOf(false) }
     var selectedAlgorithm by remember { mutableStateOf("Caesar") }
 
@@ -49,7 +49,7 @@ fun ChatScreen(hostIp: String) {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                     },
                     modifier = Modifier
-                        .menuAnchor()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true)
                         .fillMaxWidth()
                 )
                 ExposedDropdownMenu(
@@ -61,6 +61,7 @@ fun ChatScreen(hostIp: String) {
                             text = { Text(algo) },
                             onClick = {
                                 selectedAlgorithm = algo
+                                chatViewModel.changeAlgorithm(selectedAlgorithm)
                                 expanded = false
                             }
                         )
