@@ -1,4 +1,4 @@
-package com.alperencitak.chatchat.algorithms.caesar
+package com.alperencitak.chatchat.algorithms
 
 interface Algorithm {
 
