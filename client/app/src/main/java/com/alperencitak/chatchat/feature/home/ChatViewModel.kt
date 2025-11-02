@@ -1,9 +1,15 @@
 package com.alperencitak.chatchat.feature.home
 
 import androidx.lifecycle.ViewModel
+import com.alperencitak.chatchat.algorithms.AffineCipher
 import com.alperencitak.chatchat.algorithms.Algorithm
 import com.alperencitak.chatchat.algorithms.Caesar
 import com.alperencitak.chatchat.algorithms.HillCipher
+import com.alperencitak.chatchat.algorithms.PlayfairCipher
+import com.alperencitak.chatchat.algorithms.RailFenceCipher
+import com.alperencitak.chatchat.algorithms.RouteCipher
+import com.alperencitak.chatchat.algorithms.SubstitutionCipher
+import com.alperencitak.chatchat.algorithms.VigenereCipher
 import com.alperencitak.chatchat.feature.model.ChatMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,6 +72,24 @@ class ChatViewModel @Inject constructor(
             "HillCipher" -> {
                 val key = arrayOf(intArrayOf(3, 3), intArrayOf(2, 5))
                 HillCipher(key = key)
+            }
+            "Substitution" -> {
+                SubstitutionCipher()
+            }
+            "Vigenere" -> {
+                VigenereCipher(key = "key")
+            }
+            "Affine" -> {
+                AffineCipher(a = 5, b = 8)
+            }
+            "Playfair" -> {
+                PlayfairCipher(key = "keyword")
+            }
+            "RailFence" -> {
+                RailFenceCipher(3)
+            }
+            "Route" -> {
+                RouteCipher(3,4)
             }
             else -> {
                 Caesar()
