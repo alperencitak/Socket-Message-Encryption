@@ -31,7 +31,10 @@ fun LoginView(
     onLoginClick: () -> Unit,
     onChangeUsername: (String) -> Unit
 ) {
-    val algorithms = listOf("Caesar", "HillCipher")
+    val algorithms = listOf(
+        "Caesar", "HillCipher", "SubstitutionCipher", "Vigenere", "Affine",
+        "Playfair", "RailFence", "Route",
+    )
     var expanded by remember { mutableStateOf(false) }
     var selectedAlgorithm by remember { mutableStateOf("Caesar") }
 
