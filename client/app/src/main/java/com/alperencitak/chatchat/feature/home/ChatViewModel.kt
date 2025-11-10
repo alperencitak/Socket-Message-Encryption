@@ -4,8 +4,12 @@ import androidx.lifecycle.ViewModel
 import com.alperencitak.chatchat.algorithms.AffineCipher
 import com.alperencitak.chatchat.algorithms.Algorithm
 import com.alperencitak.chatchat.algorithms.Caesar
+import com.alperencitak.chatchat.algorithms.ColumnarTranspositionCipher
 import com.alperencitak.chatchat.algorithms.HillCipher
+import com.alperencitak.chatchat.algorithms.OneTimePadCipher
+import com.alperencitak.chatchat.algorithms.PigpenCipher
 import com.alperencitak.chatchat.algorithms.PlayfairCipher
+import com.alperencitak.chatchat.algorithms.PolybiusCipher
 import com.alperencitak.chatchat.algorithms.RailFenceCipher
 import com.alperencitak.chatchat.algorithms.RouteCipher
 import com.alperencitak.chatchat.algorithms.SubstitutionCipher
@@ -90,6 +94,18 @@ class ChatViewModel @Inject constructor(
             }
             "Route" -> {
                 RouteCipher(3,4)
+            }
+            "Columnar Transposition" -> {
+                ColumnarTranspositionCipher()
+            }
+            "Polybius" -> {
+                PolybiusCipher()
+            }
+            "Pigpen" -> {
+                PigpenCipher()
+            }
+            "One Time Pad" -> {
+                OneTimePadCipher("key")
             }
             else -> {
                 Caesar()
