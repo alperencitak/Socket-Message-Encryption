@@ -33,7 +33,8 @@ fun LoginView(
 ) {
     val algorithms = listOf(
         "Caesar", "HillCipher", "SubstitutionCipher", "Vigenere", "Affine",
-        "Playfair", "RailFence", "Route",
+        "Playfair", "RailFence", "Route", "Columnar Transposition", "Polybius",
+        "Pigpen", "One Time Pad"
     )
     var expanded by remember { mutableStateOf(false) }
     var selectedAlgorithm by remember { mutableStateOf("Caesar") }
