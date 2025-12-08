@@ -1,10 +1,14 @@
 package com.alperencitak.chatchat.feature.home
 
 import androidx.lifecycle.ViewModel
+import com.alperencitak.chatchat.algorithms.AesLibrary
+import com.alperencitak.chatchat.algorithms.AesManual
 import com.alperencitak.chatchat.algorithms.AffineCipher
 import com.alperencitak.chatchat.algorithms.Algorithm
 import com.alperencitak.chatchat.algorithms.Caesar
 import com.alperencitak.chatchat.algorithms.ColumnarTranspositionCipher
+import com.alperencitak.chatchat.algorithms.DesLibrary
+import com.alperencitak.chatchat.algorithms.DesManual
 import com.alperencitak.chatchat.algorithms.HillCipher
 import com.alperencitak.chatchat.algorithms.OneTimePadCipher
 import com.alperencitak.chatchat.algorithms.PigpenCipher
@@ -12,6 +16,7 @@ import com.alperencitak.chatchat.algorithms.PlayfairCipher
 import com.alperencitak.chatchat.algorithms.PolybiusCipher
 import com.alperencitak.chatchat.algorithms.RailFenceCipher
 import com.alperencitak.chatchat.algorithms.RouteCipher
+import com.alperencitak.chatchat.algorithms.RsaManual
 import com.alperencitak.chatchat.algorithms.SubstitutionCipher
 import com.alperencitak.chatchat.algorithms.VigenereCipher
 import com.alperencitak.chatchat.feature.model.ChatMessage
@@ -36,6 +41,10 @@ class ChatViewModel @Inject constructor(
     private val shift = 3
     private lateinit var webSocket: WebSocket
     private lateinit var username: String
+
+    private val aesKey = "1234567890123456".toByteArray(Charsets.UTF_8)
+
+    private val desKey = "12345678".toByteArray(Charsets.UTF_8)
 
     init {
         _algorithm.value = Caesar()
@@ -106,6 +115,24 @@ class ChatViewModel @Inject constructor(
             }
             "One Time Pad" -> {
                 OneTimePadCipher("key")
+            }
+            "AES Manual" -> {
+                AesManual(aesKey)
+            }
+            "AES Library" -> {
+                AesLibrary(aesKey)
+            }
+            "DES Manual" -> {
+                DesManual(desKey)
+            }
+            "DES Library" -> {
+                DesLibrary(desKey)
+            }
+            "RSA Manual" -> {
+                RsaManual()
+            }
+            "RSA Library" -> {
+                RsaManual()
             }
             else -> {
                 Caesar()
