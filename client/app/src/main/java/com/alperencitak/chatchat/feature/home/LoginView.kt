@@ -34,7 +34,8 @@ fun LoginView(
     val algorithms = listOf(
         "Caesar", "HillCipher", "SubstitutionCipher", "Vigenere", "Affine",
         "Playfair", "RailFence", "Route", "Columnar Transposition", "Polybius",
-        "Pigpen", "One Time Pad"
+        "Pigpen", "One Time Pad", "AES Manual", "AES Library", "DES Manual",
+        "DES Library", "RSA Manual", "RSA Library"
     )
     var expanded by remember { mutableStateOf(false) }
     var selectedAlgorithm by remember { mutableStateOf("Caesar") }
@@ -100,29 +101,43 @@ fun LoginView(
                 )
             }
 
-            ExposedDropdownMenu(
+            ExposedDropdownMenuBox(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .exposedDropdownSize()
-                    .background(MaterialTheme.colorScheme.surface)
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                algorithms.forEach { algo ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = algo,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        },
-                        onClick = {
-                            selectedAlgorithm = algo
-                            chatViewModel.changeAlgorithm(selectedAlgorithm)
-                            expanded = false
-                        },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-                    )
+                CustomTextField(
+                    value = selectedAlgorithm,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = "Encryption Algorithm",
+                    leadingIcon = Icons.Default.Lock,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor(
+                            type = MenuAnchorType.PrimaryNotEditable,
+                            enabled = true
+                        )
+                        .fillMaxWidth(),
+                    placeholder = selectedAlgorithm
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    algorithms.forEach { algo ->
+                        DropdownMenuItem(
+                            text = { Text(algo) },
+                            onClick = {
+                                selectedAlgorithm = algo
+                                chatViewModel.changeAlgorithm(algo)
+                                expanded = false
+                            }
+                        )
+                    }
                 }
             }
         }
