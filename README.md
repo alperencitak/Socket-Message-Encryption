@@ -10,7 +10,7 @@ Bu proje, farklı şifreleme algoritmalarının mesaj güvenliğine etkisini **u
 ## Proje Amacı
 
 * WebSocket kullanarak **gerçek zamanlı iletişim** sağlamak
-* Mesajları farklı **şifreleme algoritmalarıyla** şifreleyerek göndermek
+* Mesajları ve dosyaları farklı **şifreleme algoritmalarıyla** şifreleyerek göndermek
 * Klasik ve modern şifreleme yöntemlerini **uygulamalı olarak göstermek**
 * Şifreleme algoritmalarının performans ve kullanım farklarını gözlemlemek
 
@@ -59,10 +59,11 @@ Bu proje, farklı şifreleme algoritmalarının mesaj güvenliğine etkisini **u
 * AES (Library)
 * DES (Manual)
 * DES (Library)
-* RSA (Manual)
-* RSA (Library)
 
 
+### Anahtar Dağıtımı için Kullanılan Yöntemler
+* RSA
+* ECC
 
 
 ## Uygulama Akışı
@@ -73,7 +74,7 @@ Bu proje, farklı şifreleme algoritmalarının mesaj güvenliğine etkisini **u
 4. Gönderilen mesaj:
    * Seçilen algoritma ile şifrelenir
    * JSON formatında server'a gönderilir
-5. Alıcı tarafta mesaj çözülür ve sohbet ekranında gösterilir
+5. Alıcı tarafta şifre çözülür ve sohbet ekranında gösterilir
 
 
 
