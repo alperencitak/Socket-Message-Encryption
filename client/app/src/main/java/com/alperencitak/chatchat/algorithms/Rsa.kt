@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.SecureRandom
 
-class RsaManual : Algorithm {
+class Rsa : Algorithm {
 
     private val bitLength = 2048
     private var n: BigInteger
@@ -65,5 +65,22 @@ class RsaManual : Algorithm {
             }
         }
         return outputStream.toString("UTF-8")
+    }
+
+    fun encryptWithExternalKey(data: ByteArray, publicKeyStr: String): ByteArray {
+        val cleanKey = publicKeyStr
+            .replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace("-----END PUBLIC KEY-----", "")
+            .replace("\n", "")
+            .trim()
+
+        val keyBytes = Base64.decode(cleanKey, Base64.DEFAULT)
+        val x509KeySpec = java.security.spec.X509EncodedKeySpec(keyBytes)
+        val keyFactory = java.security.KeyFactory.getInstance("RSA")
+        val pubKey = keyFactory.generatePublic(x509KeySpec)
+
+        val cipher = javax.crypto.Cipher.getInstance("RSA/ECB/PKCS1Padding")
+        cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, pubKey)
+        return cipher.doFinal(data)
     }
 }
