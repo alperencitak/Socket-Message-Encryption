@@ -145,8 +145,7 @@ uvicorn main:app --host 0.0.0.0 --port 12345
 
 <img width="365" height="683" alt="Image" src="https://github.com/user-attachments/assets/d8832759-fb75-4963-9aae-7892a7678813" />
 <img width="390" height="640" alt="Image" src="https://github.com/user-attachments/assets/1bc5de11-caaf-439b-b339-bb64d4fb293f" />
-
-
+<img width="403" height="618" alt="Image" src="https://github.com/user-attachments/assets/606ed768-c03f-413a-97d9-71b5f9b9a83e" />
 
 ## Örnek AES Şifrelemesi
 
