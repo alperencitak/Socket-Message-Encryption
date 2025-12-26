@@ -33,4 +33,19 @@ class AesLibrary(
         val decryptedBytes = cipher.doFinal(decodedBytes)
         return String(decryptedBytes, Charsets.UTF_8)
     }
+
+    fun encryptBytes(data: ByteArray): ByteArray {
+        val cipher = Cipher.getInstance(transformation)
+        val keySpec = SecretKeySpec(keyBytes, algorithmName)
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec)
+        return cipher.doFinal(data)
+    }
+
+    fun decryptBytes(encryptedData: ByteArray): ByteArray {
+        val cipher = Cipher.getInstance(transformation)
+        val keySpec = SecretKeySpec(keyBytes, algorithmName)
+        cipher.init(Cipher.DECRYPT_MODE, keySpec)
+        return cipher.doFinal(encryptedData)
+    }
+
 }
