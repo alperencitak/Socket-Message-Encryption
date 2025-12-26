@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import okhttp3.*
 import org.json.JSONObject
 import javax.inject.Inject
+import javax.crypto.KeyAgreement
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
@@ -47,6 +48,7 @@ class ChatViewModel @Inject constructor(
     private val desKey = "12345678".toByteArray(Charsets.UTF_8)
 
     private var sessionAesKey: ByteArray? = null
+    private var sessionDesKey: ByteArray? = null
     private val rsaProcessor = Rsa()
 
     init {
@@ -64,13 +66,18 @@ class ChatViewModel @Inject constructor(
                 try {
                     val json = JSONObject(text)
 
+                    if (json.optString("type") == "handshake") {
+                        val rsaPubKey = json.getString("rsa_public_key")
+                        val eccPubKey = json.getString("ecc_public_key")
+                        completeDoubleHandshake(rsaPubKey, eccPubKey)
+                        return
+                    }
+
                     if (!json.has("type") || json.optString("type") == "chat") {
                         val sender = json.getString("sender")
                         val encrypted = json.getString("message")
-                        val decrypted = _algorithm.value!!.decrypt(encrypted, shift)
+                        val decrypted = _algorithm.value?.decrypt(encrypted, shift) ?: encrypted
                         _messages.value += ChatMessage(decrypted, sender)
-                    } else if (json.getString("type") == "handshake") {
-                        completeHandshake(json.getString("public_key"))
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -132,7 +139,7 @@ class ChatViewModel @Inject constructor(
                 DesManual(desKey)
             }
             "DES Library" -> {
-                DesLibrary(desKey)
+                DesLibrary(sessionDesKey ?: desKey)
             }
             "RSA Manual" -> {
                 Rsa()
@@ -158,35 +165,64 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private fun completeHandshake(publicKeyStr: String) {
+    private fun completeDoubleHandshake(rsaPubKeyStr: String, eccPubKeyStr: String) {
         try {
-            val newAesKey = ByteArray(16)
-            java.security.SecureRandom().nextBytes(newAesKey)
+            val newAesKey = ByteArray(16).apply { java.security.SecureRandom().nextBytes(this) }
             this.sessionAesKey = newAesKey
 
-            val encryptedKeyBytes = rsaProcessor.encryptWithExternalKey(newAesKey, publicKeyStr)
+            val encryptedAesKey = rsaProcessor.encryptWithExternalKey(newAesKey, rsaPubKeyStr)
+            val rsaJson = JSONObject().apply {
+                put("type", "rsa_key_exchange")
+                put("encrypted_key", android.util.Base64.encodeToString(encryptedAesKey, android.util.Base64.NO_WRAP))
+            }
+            webSocket.send(rsaJson.toString())
 
-            val base64Key = android.util.Base64.encodeToString(encryptedKeyBytes, android.util.Base64.NO_WRAP)
+            val eccResult = generateEccKeyAndSecret(eccPubKeyStr)
+            this.sessionDesKey = eccResult.second
 
-            val json = JSONObject()
-            json.put("type", "key_exchange")
-            json.put("encrypted_key", base64Key)
+            val eccJson = JSONObject().apply {
+                put("type", "ecc_key_exchange")
+                put("public_key", eccResult.first)
+            }
+            webSocket.send(eccJson.toString())
 
-            webSocket.send(json.toString())
+            updateAllSessionAlgorithms()
 
-            updateAlgorithmsWithSessionKey(newAesKey)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun updateAlgorithmsWithSessionKey(key: ByteArray) {
-        val currentAlgo = _algorithm.value
-        if (currentAlgo is AesManual) {
-            _algorithm.value = AesManual(key)
-        } else if (currentAlgo is AesLibrary) {
-            _algorithm.value = AesLibrary(key)
+    private fun generateEccKeyAndSecret(serverPubKeyStr: String): Pair<String, ByteArray> {
+        val cleanKey = serverPubKeyStr.replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace("-----END PUBLIC KEY-----", "").replace("\n", "").trim()
+        val serverKeyBytes = android.util.Base64.decode(cleanKey, android.util.Base64.DEFAULT)
+
+        val keyFactory = java.security.KeyFactory.getInstance("EC")
+        val serverPubKey = keyFactory.generatePublic(java.security.spec.X509EncodedKeySpec(serverKeyBytes))
+
+        val kpg = java.security.KeyPairGenerator.getInstance("EC")
+        kpg.initialize(256)
+        val myKeyPair = kpg.generateKeyPair()
+
+        val keyAgreement = KeyAgreement.getInstance("ECDH")
+        keyAgreement.init(myKeyPair.private)
+        keyAgreement.doPhase(serverPubKey, true)
+        val sharedSecret = keyAgreement.generateSecret()
+
+        val derivedDesKey = sharedSecret.copyOfRange(0, 8)
+        val myPubKeyBase64 = android.util.Base64.encodeToString(myKeyPair.public.encoded, android.util.Base64.NO_WRAP)
+
+        return Pair(myPubKeyBase64, derivedDesKey)
+    }
+
+    private fun updateAllSessionAlgorithms() {
+        val current = _algorithm.value
+        if (current is AesLibrary || current is AesManual) {
+            _algorithm.value = if (current is AesLibrary) AesLibrary(sessionAesKey ?: aesKey) else AesManual(sessionAesKey ?: aesKey)
+        }
+        if (current is DesLibrary || current is DesManual) {
+            _algorithm.value = if (current is DesLibrary) DesLibrary(sessionDesKey ?: desKey) else DesManual(sessionDesKey ?: desKey)
         }
     }
 }
-
