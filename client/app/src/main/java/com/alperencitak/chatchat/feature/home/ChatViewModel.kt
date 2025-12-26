@@ -1,5 +1,6 @@
 package com.alperencitak.chatchat.feature.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.alperencitak.chatchat.algorithms.AesLibrary
 import com.alperencitak.chatchat.algorithms.AesManual
@@ -65,23 +66,40 @@ class ChatViewModel @Inject constructor(
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
                     val json = JSONObject(text)
+                    val type = json.optString("type")
 
-                    if (json.optString("type") == "handshake") {
-                        val rsaPubKey = json.getString("rsa_public_key")
-                        val eccPubKey = json.getString("ecc_public_key")
-                        completeDoubleHandshake(rsaPubKey, eccPubKey)
-                        return
-                    }
+                    when (type) {
+                        "handshake" -> {
+                            val rsaPubKey = json.getString("rsa_public_key")
+                            val eccPubKey = json.getString("ecc_public_key")
+                            completeDoubleHandshake(rsaPubKey, eccPubKey)
+                        }
+                        "file" -> {
+                            val fileName = json.getString("file_name")
+                            val sender = json.getString("sender")
+                            val encryptedBase64 = json.getString("message")
+                            val encryptedBytes = android.util.Base64.decode(encryptedBase64, android.util.Base64.DEFAULT)
 
-                    if (!json.has("type") || json.optString("type") == "chat") {
-                        val sender = json.getString("sender")
-                        val encrypted = json.getString("message")
-                        val decrypted = _algorithm.value?.decrypt(encrypted, shift) ?: encrypted
-                        _messages.value += ChatMessage(decrypted, sender)
+                            val currentAlgo = _algorithm.value
+                            if (currentAlgo is AesLibrary) {
+                                val decryptedBytes = currentAlgo.decryptBytes(encryptedBytes)
+                                _messages.value += ChatMessage("[Dosya Alındı: $fileName]", sender)
+                            }
+                        }
+                        "chat", "" -> {
+                            val sender = json.getString("sender")
+                            val encrypted = json.getString("message")
+                            val decrypted = _algorithm.value?.decrypt(encrypted, shift) ?: encrypted
+                            _messages.value += ChatMessage(decrypted, sender)
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+            }
+
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d("ChatViewModel", "Bağlantı başarıyla kuruldu!")
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -156,6 +174,25 @@ class ChatViewModel @Inject constructor(
 
             webSocket.send(json.toString())
             _messages.value += ChatMessage(text, username)
+        }
+    }
+
+    fun sendFile(fileBytes: ByteArray, fileName: String) {
+        val currentAlgo = _algorithm.value
+
+        if (currentAlgo is AesLibrary) {
+            val encryptedFile = currentAlgo.encryptBytes(fileBytes)
+            val base64File = android.util.Base64.encodeToString(encryptedFile, android.util.Base64.NO_WRAP)
+
+            val json = JSONObject().apply {
+                put("sender", username)
+                put("message", base64File)
+                put("type", "file")
+                put("file_name", fileName)
+            }
+
+            webSocket.send(json.toString())
+            _messages.value += ChatMessage("[Dosya Gönderildi: $fileName]", username)
         }
     }
 
