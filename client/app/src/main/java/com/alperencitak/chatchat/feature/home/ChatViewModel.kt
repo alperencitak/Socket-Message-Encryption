@@ -136,16 +136,10 @@ class ChatViewModel @Inject constructor(
                 AesLibrary(sessionAesKey ?: aesKey)
             }
             "DES Manual" -> {
-                DesManual(desKey)
+                DesManual(sessionAesKey ?: aesKey)
             }
             "DES Library" -> {
                 DesLibrary(sessionDesKey ?: desKey)
-            }
-            "RSA Manual" -> {
-                Rsa()
-            }
-            "RSA Library" -> {
-                Rsa()
             }
             else -> {
                 Caesar()

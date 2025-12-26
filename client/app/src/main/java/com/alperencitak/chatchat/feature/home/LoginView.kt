@@ -35,7 +35,7 @@ fun LoginView(
         "Caesar", "HillCipher", "SubstitutionCipher", "Vigenere", "Affine",
         "Playfair", "RailFence", "Route", "Columnar Transposition", "Polybius",
         "Pigpen", "One Time Pad", "AES Manual", "AES Library", "DES Manual",
-        "DES Library", "RSA Manual", "RSA Library"
+        "DES Library"
     )
     var expanded by remember { mutableStateOf(false) }
     var selectedAlgorithm by remember { mutableStateOf("Caesar") }
